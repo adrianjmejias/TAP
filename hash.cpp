@@ -21,7 +21,7 @@ std::vector<int> GenerateRandom(size_t size, std::function<int()> generator){
 
 int main(){
 
-    std::vector<int> testCases;
+    std::vector<int> testCases = {100, 10000, 1000000, 1000000000};
     std::unordered_map<int> _umap;
     std::map<int> _map;
 
