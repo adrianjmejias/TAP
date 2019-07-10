@@ -6,14 +6,6 @@ using std::endl;
 using std::list;
 using std::ostream;
 
-#define ASSERT(x)                               \
-    if (x)                                      \
-    {                                           \
-        cout << "Assert failed" << endl;        \
-        cout << #x << endl;                     \
-        cout << "Linea " << __LINE__ << endl;   \
-        cout << "Archivo " << __FILE__ << endl; \
-    }                                           \
 
 class Person
 {
