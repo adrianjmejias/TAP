@@ -1,6 +1,7 @@
 .vscode/
 .DS_Store
-
+.vs/
+*.class
 *.bin
 # Prerequisites
 *.d
