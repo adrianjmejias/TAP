@@ -1,0 +1,20 @@
+test 1000
+
+avg push 950
+avg pop 154670
+avg sort 145394
+------
+
+
+avg push 84239
+avg pop 226133
+avg sort 315101
+------
+
+
+
+
+avg push 2091
+avg pop 17526
+avg sort 20008
+------
