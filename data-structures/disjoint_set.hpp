@@ -52,24 +52,10 @@ int main()
     
     // Since,your friend is low on funds,the data center he uses has a restriction-the MAXIMUM size of any community cannot exceed 'm'.
 
+    int N;
+    int M; // max num of people in a community
+    int Q; // num querys
 
-    // You need to work on following three types of queries-
-
-
-    
-    // NOTE- A friend requested is accepted only if the merger of the two communities results in a community not greater than 'm'.
-
-
-    // The first line of input consists of two positive integers - n and m(n is the number of registered users and m is the maximum size of any community).
-    // Next line consist of a positive integer q(number of queries).
-
-    // q lines follows(Each line consist of a query as described in the problem statement).
-
-    // The queries follows 1-indexing.
-
-    int N, M, Q;
-
-    // std::cin >> N >> M >> Q;
     scanf("%d %d\n", &N, &M);
     scanf("%d\n", &Q);
 
@@ -95,6 +81,7 @@ int main()
         if(scanf("A %d %d", n1, n2) == 3)
         {
             // A x y - x sends a friend request to y
+             // NOTE- A friend requested is accepted only if the merger of the two communities results in a community not greater than 'm'.
             std::cout<< n1<<n2<< std::endl;
 
 
