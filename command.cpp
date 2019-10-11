@@ -3,11 +3,27 @@
 #include <string>
 #include <fstream>
 #include <vector>
+#include <functional>
+#include <math.h>
 #include <algorithm>
-#include <cmath>
 #include <iostream>
-#include <time.h>
+#include <chrono>
+#include <numeric>
+
 using namespace std;
+
+
+template <typename durationType>
+durationType measureTime(std::function<void()> f)
+{
+    auto start = std::chrono::system_clock::now();
+
+    f();
+
+    auto end = std::chrono::system_clock::now();
+    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+}
+
 
 //Strassen 
 class Strassen{
@@ -216,39 +232,68 @@ void orden3(vector<vector<int>> A, vector<vector<int>> B, vector<vector<int>> &C
 int main(int argc, char *argv[])
 {
     srand (time(NULL));
-    clock_t start, end;
     Strassen *strAlgr = new Strassen();
-    for(int n = 16; n <=2048; n=n+n)
-    {
-        vector<int> rows(n);
-        vector<vector<int>> A(n, rows), B(n, rows), C(n, rows);
+    const int nTests = 5;
+    std::vector<int> matrixSizes{16,32,64,128,256,512};
+    
+    std::vector<std::vector<float>> values[2];
 
-        //Initializing matrixes
-        for (int i = 0; i < n; i++)
+
+
+    // std::cout<<"cccc"<<std::endl;
+
+    int itSize = 0;
+        for(auto n : matrixSizes)
         {
-            for (int j = 0; j < n; j++)
+            values[0].emplace_back();
+            values[1].emplace_back();
+            vector<int> rows(n);
+            vector<vector<int>> A(n, rows), B(n, rows), C(n, rows);
+
+            //Initializing matrixes
+            for (int i = 0; i < n; i++)
             {
-                A[i][j] = rand() % n;
-                B[i][j] = rand() % n;
-                C[i][j] = 0;
+                for (int j = 0; j < n; j++)
+                {
+                    A[i][j] = rand() % n;
+                    B[i][j] = rand() % n;
+                    C[i][j] = 0;
+                }
             }
+
+        for(int ii = 0; ii< nTests; ii++)
+        {
+            // std::cout<<"bbbbb "<<itSize<<std::endl;
+
+            auto time = measureTime<float>([&]()
+            {
+                strAlgr->strassen(A, B, C, n); 
+            });
+            values[0][itSize].push_back(time/1000);
+
             
+            time = measureTime<float>([&]()
+            {
+                orden3(A, B, C, n);
+            });
+            values[1][itSize].push_back(time/1000);
+            // std::cout<<"hhhhhh"<<std::endl;
+
         }
-        
+        std::cout<< "done with "<< n <<std::endl;
+        itSize++;
+    }
 
-        cout << "*************************************************************" << endl;
-        start = clock();
-        strAlgr->strassen(A, B, C, n);
-        end = clock();
-        cout << "El tiempo promedio de Multiplicacion de matrices de tamaño " << n << ", por Strassen es: " << ((float)(end - start) / CLOCKS_PER_SEC) << "s" << endl;
+    // std::cout<<"aaaa"<<std::endl;
+    for(int ii= 0; ii < nTests; ii++)
+    {
+        std::cout << "promedio strassen "<< std::fixed << 
+            std::accumulate(values[0][ii].begin(), values[0][ii].end(), 0.0)/nTests
+        << std::endl;
 
-        start = clock();
-        orden3(A, B, C, n);
-        end = clock();
-        cout << "El tiempo promedio de Multiplicacion de matrices de tamaño " << n << ", por Cubico es: " << ((float)(end - start) / CLOCKS_PER_SEC) << "s" << endl;
-        cout << "*************************************************************" << endl;
-
-        //strAlgr->print(C, n);
+        std::cout<< "Promedio cubico "<< std::fixed << 
+            std::accumulate(values[1][ii].begin(), values[1][ii].end(), 0.0)/nTests
+        <<std::endl;
     }
 
     return 0;

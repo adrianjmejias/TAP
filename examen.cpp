@@ -157,7 +157,19 @@ int ccw(Vec2 p1, Vec2 p2, Vec2 p3)
     
 
 } 
-
+// To find orientation of ordered triplet (p, q, r). 
+// The function returns following values 
+// 0 --> p, q and r are colinear 
+// 1 --> Clockwise 
+// 2 --> Counterclockwise 
+int orientation(Vec2 p, Vec2 q, Vec2 r) 
+{ 
+    int val = (q.y - p.y) * (r.x - q.x) - 
+              (q.x - p.x) * (r.y - q.y); 
+  
+    if (val == 0) return 0;  // colinear 
+    return (val > 0)? 1: 2; // clock or counterclock wise 
+} 
 
 void FilterQueue(std::priority_queue<Vec2, std::vector<Vec2>, Vec2Comparator> &q)
 {
@@ -174,11 +186,16 @@ void FilterQueue(std::priority_queue<Vec2, std::vector<Vec2>, Vec2Comparator> &q
     //     std::cout<< aux[ii] <<"   angle   "<< aux[ii].angle<< std::endl;
     // }
 
+
+
+    // asumimos que está ordenado por angulo
     for(int ii = aux.size()-1, next; ii >= 0; ii--)
     {
         float dist = Distance(aux[ii], (*pp));
         int farthest = ii;
 
+
+        // vemos el más lejos que tenga el mismo angulo
         while( ( next = ii-1) >=0 && fequal(aux[ii].angle, aux[next].angle))
         {
             // std::cout<< aux[ii] <<"   angle   "<< aux[ii].angle<< std::endl;
@@ -288,6 +305,9 @@ RetVal GrahamAlgorithm(RetVal points)
     //         pop stack
     //     push point to stack
     // end
+    stack.push_back(q.top()); q.pop();
+    stack.push_back(q.top()); q.pop();
+    stack.push_back(q.top()); q.pop();
 
     while(!q.empty())
     {
@@ -301,7 +321,7 @@ RetVal GrahamAlgorithm(RetVal points)
         // clockwise if ccw < 0, and collinear if ccw = 0. (In real applications, 
         // if the coordinates are arbitrary real numbers, the function requires exact comparison of floating-point numbers,
         // and one has to beware of numeric singularities for "nearly" collinear points.)
-        while((sz = stack.size()) > 1 && ccw(stack[sz-2], stack[sz-1], point) < 0)
+        while((sz = stack.size()) > 1 && orientation(stack[sz-2], stack[sz-1], point) == 1)
         {
             std::cout << "stack.pop_back--------------- " << stack[sz-1]<<std::endl;
             stack.pop_back();
@@ -392,11 +412,11 @@ int main()
         // Vec2(0.5f,0.5f),
 
 
-        Vec2(-1,0),
-        Vec2(1,0),
-        Vec2(0,1),
-        Vec2(0,-1),
-        Vec2(0,0)
+        // Vec2(-1,0),
+        // Vec2(1,0),
+        // Vec2(0,1),
+        // Vec2(0,-1),
+        // Vec2(0,0)
 
 
 
@@ -458,6 +478,18 @@ int main()
         // Vec2(0.9000000000000004, -1.786057109949175),
         // Vec2(1.2000000000000002, -1.5999999999999999),
         // Vec2(1.5000000000000004, -1.3228756555322947),
+
+
+
+        Vec2(3,0),
+        Vec2(-3,0),
+        Vec2(0,-3),
+        Vec2(0,3),
+
+        Vec2(5,0),
+        Vec2(-5,0),
+        Vec2(0,-5),
+        Vec2(0,5),
     };
 
     DummyAlgorithm(geometry);
