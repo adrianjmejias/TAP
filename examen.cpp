@@ -726,7 +726,7 @@ int main()
     // std::cout<< PointInTriangle(Vec2(3,0),Vec2(0,5),Vec2(0,-5),Vec2(-5,0))<<std::endl;;
 
     srand((int)time(0));
-    const int nTests = 30;
+    const int nTests = 5;
     std::vector<int> nCases{100, 200};
     std::vector<unsigned long long> timesDummy{0,0,0,0,0};
     std::vector<unsigned long long> timesGraham{0,0,0,0,0};
@@ -754,8 +754,8 @@ int main()
     
     for (size_t jj = 0; jj < nCases.size(); jj++)
     {
-        std::cout<< "promedio normal "<<nCases[jj]<<": "<< std::accumulate(timesDummy.begin(), timesDummy.end(), 0.0f)/float(nTests) <<std::endl;
-        std::cout<< "promedio Graham "<<nCases[jj]<<": "<< std::accumulate(timesDummy.begin(), timesDummy.end(), 0.0f)/float(nTests) <<std::endl;
+        std::cout<< "promedio normal "<<nCases[jj]<<": "<<std::fixed<< timesDummy[jj]/float(nTests) <<std::endl;
+        std::cout<< "promedio Graham "<<nCases[jj]<<": "<<std::fixed<< timesGraham[jj]/float(nTests) <<std::endl;
     }
 
 
