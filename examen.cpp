@@ -11,15 +11,18 @@
 #include <algorithm>
 #include <stack>
 #include <queue>
+#include <numeric>
 #include <deque>
 #include <array>
 #include <set>
 #include <iostream>
 #include <unordered_set>
 #include <math.h>
+#include <cstdlib>
+#include <ctime>
 
 template <typename TT>
-std::vector<TT> GenerateRandom(size_t size, std::function<TT()> generator)
+inline std::vector<TT> GenerateRandom(size_t size, std::function<TT()> generator)
 {
     std::vector<TT> randVec;
     for (int ii = 0; ii < size; ii++)
@@ -31,7 +34,7 @@ std::vector<TT> GenerateRandom(size_t size, std::function<TT()> generator)
 
 
 template <typename durationType>
-durationType measureTime(std::function<void()> f)
+inline durationType measureTime(std::function<void()> f)
 {
     auto start = std::chrono::system_clock::now();
 
@@ -109,7 +112,7 @@ float Distance(const Vec2 &a, const Vec2 &b)
     return sqrt( l + r );
 }
 
-Vec2 Normalize(Vec2 v)
+inline Vec2 Normalize(Vec2 v)
 {
     float mag = sqrt(v.x*v.x + v.y*v.y);
     v.x /= mag;
@@ -117,7 +120,7 @@ Vec2 Normalize(Vec2 v)
     return v;
 }
 
-float Dot(const Vec2 &a, const Vec2 &b)
+inline float Dot(const Vec2 &a, const Vec2 &b)
 {
     return (a.x * b.x) + (a.y * b.y);
 }
@@ -173,7 +176,7 @@ int orientation(Vec2 p, Vec2 q, Vec2 r)
     return (val > 0)? 1: 2; // clock or counterclock wise 
 } 
 
-void FilterQueue(std::priority_queue<Vec2, std::vector<Vec2>, Vec2Comparator> &q)
+inline void FilterQueue(std::priority_queue<Vec2, std::vector<Vec2>, Vec2Comparator> &q)
 {
     std::vector<Vec2> aux;
     while(!q.empty())
@@ -258,7 +261,7 @@ RetVal GrahamAlgorithm(RetVal points)
     };
 
     
-    std::cout << "minimun at "<< p << std::endl;
+    // std::cout << "minimun at "<< p << std::endl;
     std::swap(points[0], points[p]); // pa que sea menos ladilla hacer todo
     p = 0;
     pp = &points[p];
@@ -335,16 +338,16 @@ RetVal GrahamAlgorithm(RetVal points)
 
     for (auto &&i : stack)
     {
-        std::cout << "i "<<i<< std::endl;
+        // std::cout << "i "<<i<< std::endl;
     }
     return stack;
 }
-float sign (Vec2 p1, Vec2 p2, Vec2 p3)
+inline float sign (Vec2 p1, Vec2 p2, Vec2 p3)
 {
     return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
 }
 
-bool PointInTriangle (Vec2 pt, Vec2 v1, Vec2 v2, Vec2 v3)
+inline bool PointInTriangle (Vec2 pt, Vec2 v1, Vec2 v2, Vec2 v3)
 {
     float d1, d2, d3;
     bool has_neg, has_pos;
@@ -451,7 +454,7 @@ struct TrianglePoint : public Vec2, Eliminable{
     }
 
 
-    void Eliminate(std::vector<Triangle>& triangles)
+    inline void Eliminate(std::vector<Triangle>& triangles)
     {
         if (IsActive())
         {           
@@ -473,7 +476,7 @@ struct TrianglePoint : public Vec2, Eliminable{
     }
 };
 
-void comb(int N, int K, std::vector< Triangle > &triangles)
+inline void comb(int N, int K, std::vector< Triangle > &triangles)
 {
     std::string bitmask(K, 1); // K leading 1's
     bitmask.resize(N, 0); // N-K trailing 0's
@@ -490,13 +493,11 @@ void comb(int N, int K, std::vector< Triangle > &triangles)
         // std::cout << std::endl;
     } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
 }
-struct DummyAlgo
-{
     // std::unordered_set<Triangle> trianglesBuilt;
     // std::vector<TrianglePoint> points;
 
 
-    bool EliminateInnerPoints(const Triangle& t, std::vector<Triangle> &triangles, std::vector<TrianglePoint> &points)
+    inline bool EliminateInnerPoints(const Triangle& t, std::vector<Triangle> &triangles, std::vector<TrianglePoint> &points)
     {
         // std::cout << "Checking Triangle "<< t<<" -> "<<points[t[0]]<<points[t[1]]<<points[t[2]]<< std::endl;
         for (int ii = 0; ii< points.size(); ii++)
@@ -593,13 +594,13 @@ struct DummyAlgo
         }
         
 
-        for (auto &&ii : convexHull)
-        {
+        // for (auto &&ii : convexHull)
+        // {
 
-            std::cout <<"   "<< ii <<std::endl;
+        //     // std::cout <<"   "<< ii <<std::endl;
 
             
-        }
+        // }
         
 
 
@@ -607,8 +608,12 @@ struct DummyAlgo
         return convexHull;
     }
     
-};
 
+
+int random_sign()
+{
+    return (rand()%100 <50)? -1 : 1;
+}
 
 int main()
 {
@@ -712,7 +717,6 @@ int main()
     
 
     std::vector<int> a;
-    DummyAlgo algo;
     
 
     // std::cout << PointInTriangle( Vec2(-1.5,1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
@@ -720,12 +724,45 @@ int main()
     // std::cout << PointInTriangle( Vec2(-5,-1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
     // std::cout << PointInTriangle( Vec2(1.5,1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
     // std::cout<< PointInTriangle(Vec2(3,0),Vec2(0,5),Vec2(0,-5),Vec2(-5,0))<<std::endl;;
-    algo.DummyAlgorithm(geometry);
-    GrahamAlgorithm(geometry);
+
+    srand((int)time(0));
+    const int nTests = 30;
+    std::vector<int> nCases{100, 200};
+    std::vector<unsigned long long> timesDummy{0,0,0,0,0};
+    std::vector<unsigned long long> timesGraham{0,0,0,0,0};
+
+    for (size_t jj = 0; jj < nCases.size(); jj++)
+    {
+        auto geo = GenerateRandom<Vec2>(nCases[jj], []() -> Vec2 {
+            float l  = random_sign() *  rand() % 100;
+            float r  = random_sign() *  rand() % 100;
+            return Vec2(l, r);
+        });
+
+        for (size_t ii = 0; ii < nTests; ii++)
+        {
+            timesDummy[jj] += measureTime<unsigned long long>([&](){
+                DummyAlgorithm(geo);
+            });
+
+            timesGraham[jj] += measureTime<unsigned long long>([&](){
+                GrahamAlgorithm(geo);
+            });
+            std::cout<< "Case "<< nCases[jj] <<": "<< ii/float(nTests-1)<< std::endl; 
+        }
+    }
+    
+    for (size_t jj = 0; jj < nCases.size(); jj++)
+    {
+        std::cout<< "promedio normal "<<nCases[jj]<<": "<< std::accumulate(timesDummy.begin(), timesDummy.end(), 0.0f)/float(nTests) <<std::endl;
+        std::cout<< "promedio Graham "<<nCases[jj]<<": "<< std::accumulate(timesDummy.begin(), timesDummy.end(), 0.0f)/float(nTests) <<std::endl;
+    }
+
+
+
 
     // std::cout<<"ccw "<<ccw(Vec2(0,-1), Vec2(1,0),Vec2(0,1))<<std::endl;
     // std::cout<<"cw "<<ccw(Vec2(0,1),Vec2(1,0), Vec2(0,-1))<<std::endl;
     // std::cout<<"co "<<ccw(Vec2(0,1),Vec2(0,0), Vec2(0,-1))<<std::endl;
     return 0;
 }
-
