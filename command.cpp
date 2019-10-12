@@ -9,6 +9,9 @@
 #include <iostream>
 #include <chrono>
 #include <numeric>
+#include <cstdlib>
+#include <ctime>
+
 
 using namespace std;
 
@@ -233,12 +236,13 @@ int main(int argc, char *argv[])
 {
     srand (time(NULL));
     Strassen *strAlgr = new Strassen();
-    const int nTests = 5;
-    std::vector<int> matrixSizes{16,32,64,128,256,512};
+    const int nTests = 10;
+    std::vector<int> matrixSizes{16,32,64,128,256,512,1024, 2048};
     
     std::vector<std::vector<float>> values[2];
 
-
+    values[0].reserve(matrixSizes.size());
+    values[1].reserve(matrixSizes.size());
 
     // std::cout<<"cccc"<<std::endl;
 
@@ -247,6 +251,9 @@ int main(int argc, char *argv[])
         {
             values[0].emplace_back();
             values[1].emplace_back();
+
+            values[0][values[0].size() -1].reserve(nTests);
+            values[1][values[1].size() -1].reserve(nTests);
             vector<int> rows(n);
             vector<vector<int>> A(n, rows), B(n, rows), C(n, rows);
 
@@ -269,14 +276,14 @@ int main(int argc, char *argv[])
             {
                 strAlgr->strassen(A, B, C, n); 
             });
-            values[0][itSize].push_back(time/1000);
+            values[0][itSize].push_back(time);
 
             
             time = measureTime<float>([&]()
             {
                 orden3(A, B, C, n);
             });
-            values[1][itSize].push_back(time/1000);
+            values[1][itSize].push_back(time);
             // std::cout<<"hhhhhh"<<std::endl;
 
         }
@@ -285,13 +292,13 @@ int main(int argc, char *argv[])
     }
 
     // std::cout<<"aaaa"<<std::endl;
-    for(int ii= 0; ii < nTests; ii++)
+    for(int ii= 0; ii < matrixSizes.size(); ii++)
     {
-        std::cout << "promedio strassen "<< std::fixed << 
+        std::cout << "promedio strassen "<<matrixSizes[ii]<< " :"<< std::fixed << 
             std::accumulate(values[0][ii].begin(), values[0][ii].end(), 0.0)/nTests
         << std::endl;
 
-        std::cout<< "Promedio cubico "<< std::fixed << 
+        std::cout<< "Promedio cubico "<<matrixSizes[ii]<< " :"<< std::fixed << 
             std::accumulate(values[1][ii].begin(), values[1][ii].end(), 0.0)/nTests
         <<std::endl;
     }

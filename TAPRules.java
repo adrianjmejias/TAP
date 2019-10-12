@@ -65,7 +65,6 @@ class TAPRules {
                     // en caso de que lo de a sea menor a lo de b
                     // esto es para no saltar i
                     dp(S, A, B, initA, initB + 1, times);
-
                 }
             }
 

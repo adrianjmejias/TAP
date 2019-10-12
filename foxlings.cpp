@@ -73,8 +73,6 @@ class DisjointSet
 
         if(!were_joined && doUnion)
         {
-<<<<<<< HEAD
-=======
             while(y != ry)
             {
                 data[y] = data[data[y]];
@@ -87,7 +85,6 @@ class DisjointSet
                 x = data[x];
             }
 
->>>>>>> 13bad409f5f7d4081dc2a93501276ca02c2d9078
             data[rx] = ry;
             were_joined=true;
             // std::cout<<"joined " << rx << " to "<< ry<<std::endl;
@@ -130,16 +127,8 @@ int main()
 
         foxies.add(a);
         foxies.add(b);
-<<<<<<< HEAD
-
-
-
-
-        if(!foxies.union_belong(  foxies.find(a), foxies.find(b), true))
-=======
 
         if(foxies.union_belong(a,b, true))
->>>>>>> 13bad409f5f7d4081dc2a93501276ca02c2d9078
         {
             // std::cout<<"res--"<<std::endl;
             res--;
