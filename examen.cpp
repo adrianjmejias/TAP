@@ -13,7 +13,9 @@
 #include <queue>
 #include <deque>
 #include <array>
+#include <set>
 #include <iostream>
+#include <unordered_set>
 #include <math.h>
 
 template <typename TT>
@@ -323,10 +325,10 @@ RetVal GrahamAlgorithm(RetVal points)
         // and one has to beware of numeric singularities for "nearly" collinear points.)
         while((sz = stack.size()) > 1 && orientation(stack[sz-2], stack[sz-1], point) == 1)
         {
-            std::cout << "stack.pop_back--------------- " << stack[sz-1]<<std::endl;
+            // std::cout << "stack.pop_back--------------- " << stack[sz-1]<<std::endl;
             stack.pop_back();
         }
-        std::cout << "stack.push_back*********** " << point<<std::endl;
+        // std::cout << "stack.push_back*********** " << point<<std::endl;
         stack.push_back(point);
     }
 
@@ -337,7 +339,25 @@ RetVal GrahamAlgorithm(RetVal points)
     }
     return stack;
 }
+float sign (Vec2 p1, Vec2 p2, Vec2 p3)
+{
+    return (p1.x - p3.x) * (p2.y - p3.y) - (p2.x - p3.x) * (p1.y - p3.y);
+}
 
+bool PointInTriangle (Vec2 pt, Vec2 v1, Vec2 v2, Vec2 v3)
+{
+    float d1, d2, d3;
+    bool has_neg, has_pos;
+
+    d1 = sign(pt, v1, v2);
+    d2 = sign(pt, v2, v3);
+    d3 = sign(pt, v3, v1);
+
+    has_neg = (d1 < 0) || (d2 < 0) || (d3 < 0);
+    has_pos = (d1 > 0) || (d2 > 0) || (d3 > 0);
+
+    return !(has_neg && has_pos);
+}
 class Eliminable
 {
     protected:
@@ -352,23 +372,96 @@ class Eliminable
 
 struct Triangle : public Eliminable
 {
-    std::array<int, 3> vertexIndices;
-    void Eliminate()
+    bool Eliminate();
+    Triangle(int x, int y, int z)
     {
-        isActive = false;
+        SetVertices(x,y,z);
     }
+
+    bool HasIndex(int idx) const 
+    {  
+        for (size_t ii = 0; ii < 3; ii++)
+        {
+            if(this->vertexIndices[ii] == idx)
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool operator==(const Triangle &t) const 
+    {  
+        for (size_t ii = 0; ii < 3; ii++)
+        {
+            if(this->vertexIndices[ii] != t.vertexIndices[ii])
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // with this we can assume a triangle has it's vertices ordered
+    // this is usefull to check combination of triangles
+    void SetVertices(int x, int y, int z)
+    {
+        vertexIndices[0] = x;
+        vertexIndices[1] = y;
+        vertexIndices[2] = z;
+
+        std::make_heap(vertexIndices.begin(), vertexIndices.end());
+    }
+
+
+    int operator[](int a) const 
+    {
+        return vertexIndices[a];
+    }
+
+
+    protected:
+    std::array<int, 3> vertexIndices;
 };
+std::ostream& operator<<(std::ostream& os, const Triangle& t)
+{
+    os << "(" << t[0] << ','<< t[1]<<"," << t[2] << ")";
+    return os;
+}
+
+bool Triangle::Eliminate()
+    {
+        if(IsActive())
+        {
+            // std::cout << "killing triangle "<< *this<< std::endl;
+            isActive = false;
+            return true;
+        }
+        return false;
+    }
+
 
 struct TrianglePoint : public Vec2, Eliminable{
     std::vector<int> trianglesAssociated;
 
+    TrianglePoint(const Vec2 &p)
+    {
+        x = p.x;
+        y = p.y;
+    }
+
+
     void Eliminate(std::vector<Triangle>& triangles)
     {
         if (IsActive())
-        {
+        {           
+            isActive = false;
+            // std::cout << "Eliminating point "<< *this<< std::endl;
+
             for (int tIndex : trianglesAssociated)
             {
                 triangles[tIndex].Eliminate();
+
             }
         }
         
@@ -380,17 +473,141 @@ struct TrianglePoint : public Vec2, Eliminable{
     }
 };
 
-
-
-RetVal DummyAlgorithm(RetVal points)
+void comb(int N, int K, std::vector< Triangle > &triangles)
 {
-    RetVal convexHull;
-    std::vector<TrianglePoint> activePoints;
-    std::vector< Triangle > triangles;
+    std::string bitmask(K, 1); // K leading 1's
+    bitmask.resize(N, 0); // N-K trailing 0's
 
+    // print integers and permute bitmask
+    do {
+        std::vector<int> acum;
+        for (int i = 0; i < N; ++i) // [0..N-1] integers
+        {
+            if (bitmask[i]) acum.push_back(i);
+        }
 
-    return convexHull;
+        triangles.emplace_back(acum[0],acum[1], acum[2]);
+        // std::cout << std::endl;
+    } while (std::prev_permutation(bitmask.begin(), bitmask.end()));
 }
+struct DummyAlgo
+{
+    // std::unordered_set<Triangle> trianglesBuilt;
+    // std::vector<TrianglePoint> points;
+
+
+    bool EliminateInnerPoints(const Triangle& t, std::vector<Triangle> &triangles, std::vector<TrianglePoint> &points)
+    {
+        // std::cout << "Checking Triangle "<< t<<" -> "<<points[t[0]]<<points[t[1]]<<points[t[2]]<< std::endl;
+        for (int ii = 0; ii< points.size(); ii++)
+        {
+            TrianglePoint &p = points[ii];
+            if(p.IsActive())
+            {
+                if(!t.HasIndex(ii))
+                {
+                    if(PointInTriangle(p, points[t[0]], points[t[1]], points[t[2]]))
+                    {
+                        // std::cout << "Checking point inside "<< p<<" -> "<<points[t[0]]<<points[t[1]]<<points[t[2]]<< std::endl;
+
+
+                        p.Eliminate(triangles);
+                    }                
+                }
+            }
+        }
+        return false;
+    }
+
+    // Escriba un c ́odigo en c++ para calcular la c ́apsula convexa dados n puntos p0, p1, ...  pn-1, basado en el siguiente principio:
+    // partiendo  del  conjunto  de  n  puntos,  tomar  tres  puntos  de  ellos  a  la  vez
+    // eliminar  del  conjunto  todos  los  puntos  dentrode  ese  tri ́angulo.   
+    // Repetir  este  procedimiento  hasta  que  no  haya  un  tri ́angulo  que  contenga  uno  o  m ́as  puntos  dentro  delmismo.  
+    
+    // generar triangulo
+    // eliminar puntos dentro de el 
+    // while 
+
+    // Note que en cada paso el tama ̃no del conjunto podr ́ıa ser reducido, por lo que la cantidad de tri ́angulos remanentespodr ́ıa reducirse tambi ́en.  Haga la mejor implementaci ́on dentro de sus posibilidades con este enfoque.
+    RetVal DummyAlgorithm(RetVal points)
+    {
+        RetVal convexHull;
+        std::vector<TrianglePoint> activePoints;
+        std::vector< Triangle > triangles;
+        comb(points.size(), 3, triangles);
+
+
+        for (auto &&ii : points)
+        {
+            TrianglePoint t = TrianglePoint(ii);
+            activePoints.push_back(t);
+        }
+
+        for(int ii =0; ii < triangles.size(); ii++)
+        {
+            const Triangle &t = triangles[ii];
+            activePoints[t[0]].Add(ii);
+            activePoints[t[1]].Add(ii);
+            activePoints[t[2]].Add(ii);
+        }
+        
+        // std::cout << " before"<<std::endl;
+        // for (auto &&jj : triangles)
+        // {
+        //     std::cout << jj << std::endl;
+        // }
+
+        for (auto ii = triangles.rbegin(); ii != triangles.rend(); ii++)
+        {
+            Triangle &t = *ii;
+            if(t.IsActive())
+            {
+                if(EliminateInnerPoints(t, triangles, activePoints))
+                {
+                    // ii = triangles.rend()-1;
+                }
+            }
+        }
+        
+
+        // pa transformar los triangulos pa hulk
+        std::set<int> convertion;
+
+        // std::cout << " after"<<std::endl;
+        for (auto &&jj : triangles)
+        {
+            if(jj.IsActive())
+            {
+                // std::cout << jj << std::endl;
+                convertion.insert(jj[0]);
+                convertion.insert(jj[1]);
+                convertion.insert(jj[2]);
+
+                // std::cout << "with points " <<points[jj[0]]<<points[jj[1]]<<points[jj[2]]<<std::endl;
+            }
+        }
+
+        for (auto &&i : convertion)
+        {
+            convexHull.push_back(points[i]);
+        }
+        
+
+        for (auto &&ii : convexHull)
+        {
+
+            std::cout <<"   "<< ii <<std::endl;
+
+            
+        }
+        
+
+
+        
+        return convexHull;
+    }
+    
+};
 
 
 int main()
@@ -492,7 +709,18 @@ int main()
         Vec2(0,5),
     };
 
-    DummyAlgorithm(geometry);
+    
+
+    std::vector<int> a;
+    DummyAlgo algo;
+    
+
+    // std::cout << PointInTriangle( Vec2(-1.5,1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
+    // std::cout << PointInTriangle( Vec2(-1.5,-1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
+    // std::cout << PointInTriangle( Vec2(-5,-1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
+    // std::cout << PointInTriangle( Vec2(1.5,1), Vec2(-5,0), Vec2(0,5), Vec2(0,0));
+    // std::cout<< PointInTriangle(Vec2(3,0),Vec2(0,5),Vec2(0,-5),Vec2(-5,0))<<std::endl;;
+    algo.DummyAlgorithm(geometry);
     GrahamAlgorithm(geometry);
 
     // std::cout<<"ccw "<<ccw(Vec2(0,-1), Vec2(1,0),Vec2(0,1))<<std::endl;
