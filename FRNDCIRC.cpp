@@ -127,6 +127,7 @@ int main()
             cout << qt[pa] << endl;
         }
         
+        
     }
 
     return 0;

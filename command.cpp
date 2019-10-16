@@ -3,9 +3,8 @@
 #include <string>
 #include <fstream>
 #include <vector>
-#include <functional>
-#include <math.h>
 #include <algorithm>
+#include <cmath>
 #include <iostream>
 #include <chrono>
 #include <numeric>
@@ -14,19 +13,6 @@
 
 
 using namespace std;
-
-
-template <typename durationType>
-durationType measureTime(std::function<void()> f)
-{
-    auto start = std::chrono::system_clock::now();
-
-    f();
-
-    auto end = std::chrono::system_clock::now();
-    return std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-}
-
 
 //Strassen 
 class Strassen{
@@ -235,6 +221,7 @@ void orden3(vector<vector<int>> A, vector<vector<int>> B, vector<vector<int>> &C
 int main(int argc, char *argv[])
 {
     srand (time(NULL));
+    clock_t start, end;
     Strassen *strAlgr = new Strassen();
     const int nTests = 10;
     std::vector<int> matrixSizes{16,32,64,128,256,512,1024, 2048};
@@ -246,8 +233,8 @@ int main(int argc, char *argv[])
 
     // std::cout<<"cccc"<<std::endl;
 
-    int itSize = 0;
-        for(auto n : matrixSizes)
+        //Initializing matrixes
+        for (int i = 0; i < n; i++)
         {
             values[0].emplace_back();
             values[1].emplace_back();
@@ -260,12 +247,9 @@ int main(int argc, char *argv[])
             //Initializing matrixes
             for (int i = 0; i < n; i++)
             {
-                for (int j = 0; j < n; j++)
-                {
-                    A[i][j] = rand() % n;
-                    B[i][j] = rand() % n;
-                    C[i][j] = 0;
-                }
+                A[i][j] = rand() % n;
+                B[i][j] = rand() % n;
+                C[i][j] = 0;
             }
 
         for(int ii = 0; ii< nTests; ii++)
@@ -287,9 +271,7 @@ int main(int argc, char *argv[])
             // std::cout<<"hhhhhh"<<std::endl;
 
         }
-        std::cout<< "done with "<< n <<std::endl;
-        itSize++;
-    }
+        
 
     // std::cout<<"aaaa"<<std::endl;
     for(int ii= 0; ii < matrixSizes.size(); ii++)
